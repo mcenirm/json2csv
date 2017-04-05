@@ -1,0 +1,22 @@
+[
+  {
+    "Number": 1,
+    "Size": "small",
+    "Shape": "square",
+    "Color": "red"
+  },
+  {
+    "Color": "green",
+    "Comment": "Missing field (Shape)",
+    "Number": 2,
+    "Size": "medium"
+  },
+  {
+    "Color": "blue",
+    "Comment": "Extra field (Material)",
+    "Material": "Wood",
+    "Number": 3,
+    "Shape": "flat",
+    "Size": "big"
+  }
+]

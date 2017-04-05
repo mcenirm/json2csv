@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+set -u
+
+for json in test_*.json ; do
+  expected=${json%.json}.csv
+  ./json2csv "$json" | diff -u "$expected" -
+done
+
+echo 'All tests passed.'

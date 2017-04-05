@@ -1,0 +1,70 @@
+#!/bin/bash
+
+Usage () { cat >&2 <<EOF
+Usage: $0 [OPTIONS] [FILES]
+Convert JSON to CSV (requires jq)
+Options:
+  --slurp/-s  Wrap sequence of JSON in array
+EOF
+}
+
+
+if ! command -v jq >/dev/null ; then
+  echo >&2 "Error: Cannot find jq"
+  exit 2
+fi
+
+
+jq_options=( --raw-output )
+while [ $# -gt 0 ] ; do
+  case "$1" in
+    --slurp|-s)
+      jq_options+=( --slurp )
+      shift
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*)
+      Usage
+      exit 2
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+
+jq_script='
+if type == "array" then
+  .[0] as $first
+  |
+  ($first | type) as $first_type
+  |
+  if $first_type == "array" then
+    error("TODO: Support array of array")
+  elif $first_type == "object" then
+    ($first | keys_unsorted) as $first_keys
+    |
+    ($first_keys | @csv)
+    ,
+    (
+      .[]
+      |
+      (
+        . as $record
+        |
+        $first_keys | map($record[.] // null) | @csv
+      )
+    )
+  else
+    error("TODO: Support (or error) array of " + $first_type)
+  end
+else
+  error("Expected array, but saw " + type + ". Try `--slurp` option?")
+end
+'
+
+jq "${jq_options[@]}" -f <( cat <<<"$jq_script" ) "$@"
